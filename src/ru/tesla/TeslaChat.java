@@ -11,10 +11,7 @@ import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.InputStreamReader;
 
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
@@ -144,11 +141,11 @@ public class TeslaChat extends JFrame {
 
 			add(jScrollPane, BorderLayout.CENTER);
 
+			String image1 = getClass().getResource("res/image1.gif").toString();
+			String image2 = getClass().getResource("res/image2.gif").toString();
+			
 			try {
-				String image1 = new File("src\\main\\resources\\image1.gif").toURI().toString();
-				String image2 = new File("src\\main\\resources\\image2.gif").toURI().toString();
-
-				BufferedReader br = new BufferedReader(new FileReader(new File("src\\main\\resources\\index.html")));
+				BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("res/index.html")));
 				StringBuilder sb = new StringBuilder();
 				String temp = null;
 				while ((temp = br.readLine()) != null) {
@@ -160,13 +157,10 @@ public class TeslaChat extends JFrame {
 				res = res.replaceAll("\\{image2\\}", image2);
 
 				textPane.setText(res);
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-
 	}
 	private static class TcMoveAdapter extends MouseAdapter {
 		private boolean dragging = false;
