@@ -2,15 +2,7 @@ package ru.tesla;
 import jabify.swing.ChatEditorKit;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.Insets;
@@ -19,32 +11,25 @@ import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
-import javax.swing.JSpinner;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 public class TeslaChat extends JFrame {
 	private static final long serialVersionUID = -2053293821387962615L;
-	MoveAdapter moveAdapter = new MoveAdapter();
-	private tChat chat;
+	TcMoveAdapter moveAdapter = new TcMoveAdapter();
+	private TcChatWindow chat;
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
@@ -60,7 +45,7 @@ public class TeslaChat extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		initElements();
 
-		chat = new tChat();
+		chat = new TcChatWindow();
 		chat.setSize(300, 400);
 		chat.setVisible(true);
 	}
@@ -128,12 +113,12 @@ public class TeslaChat extends JFrame {
 		// pack();
 	}
 
-	private class tChat extends JFrame {
+	private class TcChatWindow extends JFrame {
 		private static final long serialVersionUID = -6434464177145158391L;
 		private JEditorPane textPane;
 		private JScrollPane jScrollPane;
 
-		public tChat() {
+		public TcChatWindow() {
 			super();
 
 			setTitle("Чатики");
@@ -169,6 +154,7 @@ public class TeslaChat extends JFrame {
 				while ((temp = br.readLine()) != null) {
 					sb.append(temp);
 				}
+				br.close();
 				String res = sb.toString();
 				res = res.replaceAll("\\{image1\\}", image1);
 				res = res.replaceAll("\\{image2\\}", image2);
@@ -182,7 +168,7 @@ public class TeslaChat extends JFrame {
 		}
 
 	}
-	private static class MoveAdapter extends MouseAdapter {
+	private static class TcMoveAdapter extends MouseAdapter {
 		private boolean dragging = false;
 		private boolean resizing = false;
 		private int prevX = -1;

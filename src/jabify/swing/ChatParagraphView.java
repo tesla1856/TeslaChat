@@ -1,9 +1,7 @@
 package jabify.swing;
 
 import javax.swing.SizeRequirements;
-import javax.swing.text.AttributeSet;
 import javax.swing.text.Element;
-import javax.swing.text.StyleConstants;
 import javax.swing.text.html.ParagraphView;
 
 public class ChatParagraphView extends ParagraphView {
