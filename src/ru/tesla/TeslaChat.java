@@ -41,7 +41,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-public class tWindow extends JFrame {
+public class TeslaChat extends JFrame {
 	private static final long serialVersionUID = -2053293821387962615L;
 	MoveAdapter moveAdapter = new MoveAdapter();
 	private tChat chat;
@@ -49,13 +49,13 @@ public class tWindow extends JFrame {
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				tWindow win = new tWindow();
+				TeslaChat win = new TeslaChat();
 				win.setVisible(true);
 			}
 		});
 	}
 
-	public tWindow() throws HeadlessException {
+	public TeslaChat() throws HeadlessException {
 		super();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		initElements();
