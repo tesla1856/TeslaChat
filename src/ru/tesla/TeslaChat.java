@@ -2,13 +2,10 @@ package ru.tesla;
 
 import jabify.swing.ChatEditorKit;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.Insets;
@@ -34,7 +31,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
