@@ -49,7 +49,7 @@ public class TeslaChat extends JFrame
 		initElements();
 
 		chat.insertMessage("<div color=red align=center>WELCOME to Tesla Chat.</div>");
-		
+
 		chat.setSize(300, 400);
 		chat.setVisible(true);
 	}
@@ -58,7 +58,7 @@ public class TeslaChat extends JFrame
 	{
 		setLayout(new GridLayout(0, 1));
 		setTitle("Tesla.chat");
-		setPreferredSize(new Dimension(300, 200));
+		setPreferredSize(new Dimension(210, 300));
 
 		JPanel p = new JPanel(null);
 		// -------------------------//
@@ -71,7 +71,7 @@ public class TeslaChat extends JFrame
 		jl.setBounds(10, pos_y, 150, 20);
 		p.add(jl);
 		JSlider js = new JSlider(0, 100, 0);
-		js.setBounds(150, pos_y, 100, 20);
+		js.setBounds(150, pos_y, 50, 20);
 		js.addChangeListener(new ChangeListener()
 		{
 			@Override
@@ -87,7 +87,7 @@ public class TeslaChat extends JFrame
 		jl = new JLabel("Рамка:");
 		jl.setBounds(10, pos_y, 150, 20);
 		p.add(jl);
-		JCheckBox cb = new JCheckBox("", false);
+		JCheckBox cb = new JCheckBox("", true);
 		cb.setBounds(150, pos_y, 20, 20);
 		cb.addActionListener(new ActionListener()
 		{
@@ -183,7 +183,7 @@ public class TeslaChat extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				onReceiveMessage("TWITCH", "admin", "test ok!");
+				onReceiveMessage("TWITCH", "admin", "test ok! <a href='http://ya.ru'>yandex</a>");
 			}
 		});
 		p.add(button);
@@ -193,8 +193,13 @@ public class TeslaChat extends JFrame
 
 	public void onReceiveMessage(String p_chatId, String p_author, String p_message)
 	{
-				chat.insertMessage("<div class=m>"
-				+ ((new SimpleDateFormat("HH:mm:ss").format(new Date()))) + " " + p_author + ": " + p_message + "</div>");
+		onReceiveMessage(p_chatId, new Date(), p_author, p_message);
+	}
+	
+	public void onReceiveMessage(String p_chatId, Date date, String p_author, String p_message)
+	{
+		chat.insertMessage("<div class=m>" + ((new SimpleDateFormat("HH:mm:ss").format(date))) + " " + p_author + ": "
+				+ p_message + "</div>");
 	}
 
 }

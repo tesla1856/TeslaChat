@@ -4,6 +4,7 @@ import jabify.swing.ChatEditorKit;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.Rectangle;
@@ -14,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.URISyntaxException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
@@ -21,6 +23,8 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Element;
@@ -40,7 +44,7 @@ class TcChatWindow extends JFrame
 
 	private Color							chatBgColor					= Color.black;
 	private Color							chatNormalTextColor	= Color.white;
-	private Font							chatNormalFont			= new Font("Franklin Gothic Medium Cond", Font.PLAIN, 12);
+	private Font							chatNormalFont			= new Font("Tahoma", Font.BOLD, 11);
 	private boolean						chatHaveBorder			= true;
 	private Border						chatBorder;
 
@@ -101,6 +105,25 @@ class TcChatWindow extends JFrame
 
 		textPane.addMouseListener(moveAdapter);
 		textPane.addMouseMotionListener(moveAdapter);
+		textPane.addHyperlinkListener(new HyperlinkListener()
+		{
+			public void hyperlinkUpdate(HyperlinkEvent e)
+			{
+				if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
+				{
+					if (Desktop.isDesktopSupported())
+					{
+						try
+						{
+							Desktop.getDesktop().browse(e.getURL().toURI());
+						} catch (IOException | URISyntaxException e1)
+						{
+							e1.printStackTrace();
+						}
+					}
+				}
+			}
+		});
 
 		jScrollPane = new JScrollPane();
 		chatBorder = BorderFactory.createLineBorder(chatNormalTextColor);
@@ -117,9 +140,6 @@ class TcChatWindow extends JFrame
 
 	public void UpdateChat()
 	{
-		String image1 = getClass().getResource("res/image1.gif").toString();
-		String image2 = getClass().getResource("res/image2.gif").toString();
-
 		try
 		{
 			if (chatHaveBorder)
@@ -136,9 +156,11 @@ class TcChatWindow extends JFrame
 				sb.append(temp);
 			}
 			br.close();
+
 			String res = sb.toString();
 			String style = "body {";
 			style += " margin: 2px;";
+			//
 			style += " background: "
 					+ String.format("#%02x%02x%02x", chatBgColor.getRed(), chatBgColor.getGreen(), chatBgColor.getBlue()) + ";";
 			style += " color: "
@@ -148,11 +170,14 @@ class TcChatWindow extends JFrame
 					+ chatNormalFont.getSize() + "pt \"" + chatNormalFont.getFamily() + "\";";
 			style += " font-weight: " + (chatNormalFont.getStyle() == Font.BOLD ? "bold" : "normal") + ";";
 			style += "}";
+			//
 			style += ".m {text-indent: -20; margin-left: 20; margin-top: 0; text-indent: -20; clear: both;}";
+			//
+			style += "a {color: "
+					+ String.format("#%02x%02x%02x", chatNormalTextColor.getRed(), chatNormalTextColor.getGreen(),
+							chatNormalTextColor.getBlue()) + ";}";
 
 			res = res.replaceAll("_style_", style);
-			res = res.replaceAll("\\{image1\\}", image1);
-			res = res.replaceAll("\\{image2\\}", image2);
 
 			textPane.setText(res);
 
@@ -214,10 +239,13 @@ class TcChatWindow extends JFrame
 					if (dragging)
 						w.setBounds(rect.x + (e.getXOnScreen() - prevX), rect.y + (e.getYOnScreen() - prevY), rect.width,
 								rect.height);
-					else if (resizing)
-						w.setBounds(rect.x, rect.y, rect.width + (e.getXOnScreen() - prevX), rect.height
-								+ (e.getYOnScreen() - prevY));
-
+					else
+					{
+						int new_w = rect.width + (e.getXOnScreen() - prevX);
+						int new_h = rect.height + (e.getYOnScreen() - prevY);
+						if (resizing && new_w > 10 && new_h > 10)
+							w.setBounds(rect.x, rect.y, new_w, new_h);
+					}
 				};
 				prevX = e.getXOnScreen();
 				prevY = e.getYOnScreen();
