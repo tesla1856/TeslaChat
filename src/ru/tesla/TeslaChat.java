@@ -181,6 +181,8 @@ public class TeslaChat extends JFrame
       }
     });
     p.add(button);
+    
+    
 
     // -------------------------//
     // JLabel jl = new JLabel("Прозрачность", JLabel.RIGHT);
