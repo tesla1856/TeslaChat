@@ -6,6 +6,8 @@ import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -46,6 +48,8 @@ public class TeslaChat extends JFrame
 
 		initElements();
 
+		chat.insertMessage("<div color=red align=center>WELCOME to Tesla Chat.</div>");
+		
 		chat.setSize(300, 400);
 		chat.setVisible(true);
 	}
@@ -165,8 +169,32 @@ public class TeslaChat extends JFrame
 			}
 		});
 		p.add(button);
+		// -------------------------//
+		pos_y += 30;
+		jl = new JLabel("Тест:");
+		jl.setBounds(10, pos_y, 150, 20);
+		p.add(jl);
+		button = new JButton("х");
+		button.setBounds(150, pos_y, 20, 20);
+		button.setMargin(new Insets(0, 0, 0, 0));
+		button.setFont(chat.getChatNormalFont());
+		button.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				onReceiveMessage("TWITCH", "admin", "test ok!");
+			}
+		});
+		p.add(button);
 
 		pack();
+	}
+
+	public void onReceiveMessage(String p_chatId, String p_author, String p_message)
+	{
+				chat.insertMessage("<div class=m>"
+				+ ((new SimpleDateFormat("HH:mm:ss").format(new Date()))) + " " + p_author + ": " + p_message + "</div>");
 	}
 
 }

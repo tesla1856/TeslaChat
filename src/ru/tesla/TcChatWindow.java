@@ -11,7 +11,9 @@ import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 
 import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
@@ -19,6 +21,13 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import javax.swing.text.html.HTMLDocument;
 
 class TcChatWindow extends JFrame
 {
@@ -27,10 +36,11 @@ class TcChatWindow extends JFrame
 	private JEditorPane				textPane;
 	private JScrollPane				jScrollPane;
 	private TcMoveAdapter			moveAdapter					= new TcMoveAdapter();
+	private ChatEditorKit			kit									= new ChatEditorKit();
 
 	private Color							chatBgColor					= Color.black;
 	private Color							chatNormalTextColor	= Color.white;
-	private Font							chatNormalFont			= new Font("Arial Cyr", Font.BOLD, 12);
+	private Font							chatNormalFont			= new Font("Franklin Gothic Medium Cond", Font.PLAIN, 12);
 	private boolean						chatHaveBorder			= true;
 	private Border						chatBorder;
 
@@ -82,13 +92,15 @@ class TcChatWindow extends JFrame
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		textPane = new JEditorPane();
-		textPane.setEditorKit(new ChatEditorKit());
+		textPane.setEditorKit(kit);
 		textPane.setContentType("text/html");
 		textPane.setEditable(false);
 		textPane.setFocusable(false);
+		textPane.setAutoscrolls(true);
+		textPane.setMargin(new Insets(0, 0, 0, 0));
+
 		textPane.addMouseListener(moveAdapter);
 		textPane.addMouseMotionListener(moveAdapter);
-		textPane.setMargin(new Insets(0, 0, 0, 0));
 
 		jScrollPane = new JScrollPane();
 		chatBorder = BorderFactory.createLineBorder(chatNormalTextColor);
@@ -136,12 +148,14 @@ class TcChatWindow extends JFrame
 					+ chatNormalFont.getSize() + "pt \"" + chatNormalFont.getFamily() + "\";";
 			style += " font-weight: " + (chatNormalFont.getStyle() == Font.BOLD ? "bold" : "normal") + ";";
 			style += "}";
+			style += ".m {text-indent: -20; margin-left: 20; margin-top: 0; text-indent: -20; clear: both;}";
 
 			res = res.replaceAll("_style_", style);
 			res = res.replaceAll("\\{image1\\}", image1);
 			res = res.replaceAll("\\{image2\\}", image2);
 
 			textPane.setText(res);
+
 		} catch (Exception e)
 		{
 			e.printStackTrace();
@@ -213,6 +227,21 @@ class TcChatWindow extends JFrame
 		public void mouseReleased(MouseEvent e)
 		{
 			dragging = false;
+		}
+	}
+
+	public void insertMessage(String p_message)
+	{
+		HTMLDocument doc = (HTMLDocument) textPane.getDocument();
+		Element end = (doc).getElement("END_OF_MESSAGES");
+		try
+		{
+			kit.insertHTML(doc, end.getStartOffset(), p_message, 0, 0, null);
+			textPane.setCaretPosition(textPane.getDocument().getLength());
+
+		} catch (BadLocationException | IOException e)
+		{
+			e.printStackTrace();
 		}
 	}
 
