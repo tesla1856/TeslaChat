@@ -6,7 +6,6 @@ import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
@@ -48,7 +47,7 @@ public class TeslaChat extends JFrame
 
 		initElements();
 
-		chat.insertMessage("<div color=red align=center>WELCOME to Tesla Chat.</div>");
+		chat.insertText("<div color=red align=center>WELCOME to Tesla Chat.</div>");
 
 		chat.setSize(300, 400);
 		chat.setVisible(true);
@@ -191,15 +190,15 @@ public class TeslaChat extends JFrame
 		pack();
 	}
 
-	public void onReceiveMessage(String p_chatId, String p_author, String p_message)
+	public void onReceiveMessage(String chatId, String author, String message)
 	{
-		onReceiveMessage(p_chatId, new Date(), p_author, p_message);
+		onReceiveMessage(chatId, new Date(), author, message);
 	}
 	
-	public void onReceiveMessage(String p_chatId, Date date, String p_author, String p_message)
+	public void onReceiveMessage(String chatId, Date date, String author, String message)
 	{
-		chat.insertMessage("<div class=m>" + ((new SimpleDateFormat("HH:mm:ss").format(date))) + " " + p_author + ": "
-				+ p_message + "</div>");
+		TcChatMessage msg = new TcChatMessage(chatId, date, author, message);
+		chat.insertMessage(msg);
 	}
 
 }

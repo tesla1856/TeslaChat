@@ -14,8 +14,10 @@ import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.URISyntaxException;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Iterator;
 
 import javax.swing.BorderFactory;
 import javax.swing.JEditorPane;
@@ -26,27 +28,26 @@ import javax.swing.border.Border;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import javax.swing.text.Element;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 import javax.swing.text.html.HTMLDocument;
 
 class TcChatWindow extends JFrame
 {
-	private static final long	serialVersionUID		= -6434464177145158391L;
+	private static final long			serialVersionUID		= -6434464177145158391L;
 
-	private JEditorPane				textPane;
-	private JScrollPane				jScrollPane;
-	private TcMoveAdapter			moveAdapter					= new TcMoveAdapter();
-	private ChatEditorKit			kit									= new ChatEditorKit();
+	private JEditorPane						textPane;
+	private JScrollPane						jScrollPane;
+	private TcMoveAdapter					moveAdapter					= new TcMoveAdapter();
+	private ChatEditorKit					kit									= new ChatEditorKit();
 
-	private Color							chatBgColor					= Color.black;
-	private Color							chatNormalTextColor	= Color.white;
-	private Font							chatNormalFont			= new Font("Tahoma", Font.BOLD, 11);
-	private boolean						chatHaveBorder			= true;
-	private Border						chatBorder;
+	private Deque<TcChatMessage>	messages						= new ArrayDeque<TcChatMessage>();
+	private final int							MAX_MESSAGE_COUNT		= 10;
+
+	private Color									chatBgColor					= Color.black;
+	private Color									chatNormalTextColor	= Color.white;
+	private Font									chatNormalFont			= new Font("Tahoma", Font.BOLD, 11);
+	private boolean								chatHaveBorder			= true;
+	private Border								chatBorder;
 
 	public Color getChatBgColor()
 	{
@@ -137,7 +138,6 @@ class TcChatWindow extends JFrame
 		UpdateChat();
 
 	}
-
 	public void UpdateChat()
 	{
 		try
@@ -178,6 +178,11 @@ class TcChatWindow extends JFrame
 							chatNormalTextColor.getBlue()) + ";}";
 
 			res = res.replaceAll("_style_", style);
+
+			String msg_html = "";
+			for (Iterator<TcChatMessage> i = messages.iterator(); i.hasNext();)
+				msg_html += i.next().toHtml();
+			res = res.replaceAll("_messages_", msg_html);
 
 			textPane.setText(res);
 
@@ -258,15 +263,31 @@ class TcChatWindow extends JFrame
 		}
 	}
 
-	public void insertMessage(String p_message)
+	public void insertMessage(TcChatMessage msg)
+	{
+		messages.add(msg);
+		if (messages.size() > MAX_MESSAGE_COUNT)
+		{
+			messages.pollFirst();
+		}
+		insertText(msg.toHtml());
+	}
+
+	public void removeFirstMessage()
+	{
+		HTMLDocument doc = (HTMLDocument) textPane.getDocument();
+		//Element elem = doc.getElement("1");
+		//doc.removeElement(elem);
+	}
+
+	public void insertText(String text)
 	{
 		HTMLDocument doc = (HTMLDocument) textPane.getDocument();
 		Element end = (doc).getElement("END_OF_MESSAGES");
 		try
 		{
-			kit.insertHTML(doc, end.getStartOffset(), p_message, 0, 0, null);
+			kit.insertHTML(doc, end.getStartOffset(), text, 0, 0, null);
 			textPane.setCaretPosition(textPane.getDocument().getLength());
-
 		} catch (BadLocationException | IOException e)
 		{
 			e.printStackTrace();
