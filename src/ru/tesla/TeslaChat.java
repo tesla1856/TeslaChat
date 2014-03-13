@@ -2,10 +2,12 @@ package ru.tesla;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
@@ -39,7 +41,7 @@ public class TeslaChat extends JFrame
 		});
 	}
 
-	public TeslaChat() throws HeadlessException
+	public TeslaChat()
 	{
 		super();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -47,11 +49,11 @@ public class TeslaChat extends JFrame
 
 		initElements();
 
-		chat.insertText("<div color=red align=center>WELCOME to Tesla Chat.</div>");
+		chat.insertMessage(new TcChatMessage("<div color=red align=center>WELCOME to Tesla Chat.</div>"));
 
 		chat.setSize(300, 400);
 		chat.setVisible(true);
-	}
+			}
 
 	private void initElements()
 	{
@@ -192,12 +194,7 @@ public class TeslaChat extends JFrame
 
 	public void onReceiveMessage(String chatId, String author, String message)
 	{
-		onReceiveMessage(chatId, new Date(), author, message);
-	}
-	
-	public void onReceiveMessage(String chatId, Date date, String author, String message)
-	{
-		TcChatMessage msg = new TcChatMessage(chatId, date, author, message);
+		TcChatMessage msg = new TcChatMessage(chatId, new Date(), author, message);
 		chat.insertMessage(msg);
 	}
 

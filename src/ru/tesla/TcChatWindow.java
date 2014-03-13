@@ -6,9 +6,13 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Insets;
 import java.awt.Rectangle;
 import java.awt.Window;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
@@ -41,7 +45,7 @@ class TcChatWindow extends JFrame
 	private ChatEditorKit					kit									= new ChatEditorKit();
 
 	private Deque<TcChatMessage>	messages						= new ArrayDeque<TcChatMessage>();
-	private final int							MAX_MESSAGE_COUNT		= 10;
+	private int										max_msg_count				= 100;
 
 	private Color									chatBgColor					= Color.black;
 	private Color									chatNormalTextColor	= Color.white;
@@ -49,18 +53,33 @@ class TcChatWindow extends JFrame
 	private boolean								chatHaveBorder			= true;
 	private Border								chatBorder;
 
+	private KeyListener						keyListener					= new TcKeyListener();
+
+	public int getMax_msg_count()
+	{
+		return max_msg_count;
+	}
+
+	public void setMax_msg_count(int max_msg_count)
+	{
+		this.max_msg_count = max_msg_count;
+	}
+
 	public Color getChatBgColor()
 	{
 		return chatBgColor;
 	}
+
 	public void setChatBorder(Border chatBorder)
 	{
 		this.chatBorder = chatBorder;
 	}
+
 	public Color getChatNormalTextColor()
 	{
 		return chatNormalTextColor;
 	}
+
 	public Font getChatNormalFont()
 	{
 		return chatNormalFont;
@@ -100,12 +119,14 @@ class TcChatWindow extends JFrame
 		textPane.setEditorKit(kit);
 		textPane.setContentType("text/html");
 		textPane.setEditable(false);
-		textPane.setFocusable(false);
+		textPane.setFocusable(true);
+		textPane.requestFocusInWindow();
 		textPane.setAutoscrolls(true);
 		textPane.setMargin(new Insets(0, 0, 0, 0));
 
 		textPane.addMouseListener(moveAdapter);
 		textPane.addMouseMotionListener(moveAdapter);
+		textPane.addKeyListener(keyListener);
 		textPane.addHyperlinkListener(new HyperlinkListener()
 		{
 			public void hyperlinkUpdate(HyperlinkEvent e)
@@ -138,6 +159,17 @@ class TcChatWindow extends JFrame
 		UpdateChat();
 
 	}
+
+	@Override
+	public void paint(Graphics g)
+	{
+		super.paint(g);
+		Rectangle r = g.getClipBounds();
+		g.setColor(chatNormalTextColor);
+		for (int i = 0; i <= 12; i += 2)
+			g.drawLine(r.width - i, r.height, r.width, r.height - i);
+	}
+
 	public void UpdateChat()
 	{
 		try
@@ -193,8 +225,9 @@ class TcChatWindow extends JFrame
 
 	}
 
-	private static class TcMoveAdapter extends MouseAdapter
+	private class TcMoveAdapter extends MouseAdapter
 	{
+
 		private boolean	dragging	= false;
 		private boolean	resizing	= false;
 		private int			prevX			= -1;
@@ -202,11 +235,16 @@ class TcChatWindow extends JFrame
 
 		public void mousePressed(MouseEvent e)
 		{
+
 			if (SwingUtilities.isLeftMouseButton(e))
 			{
 				if (!resizing)
 					dragging = true;
 			}
+
+			if (SwingUtilities.isMiddleMouseButton(e))
+				insertMessage(new TcChatMessage("<hr style='width:50%;'/>"));
+
 			prevX = e.getXOnScreen();
 			prevY = e.getYOnScreen();
 		}
@@ -215,7 +253,7 @@ class TcChatWindow extends JFrame
 		public void mouseMoved(MouseEvent e)
 		{
 			super.mouseMoved(e);
-			boolean prev_resizing = resizing;
+
 			Window w = SwingUtilities.getWindowAncestor(e.getComponent());
 			if (w != null && w.isShowing())
 			{
@@ -225,11 +263,10 @@ class TcChatWindow extends JFrame
 				else
 					resizing = false;
 
-				if (prev_resizing != resizing)
-					if (resizing)
-						w.setCursor(Cursor.getPredefinedCursor(Cursor.SE_RESIZE_CURSOR));
-					else
-						w.setCursor(Cursor.getDefaultCursor());
+				if (resizing)
+					w.setCursor(Cursor.getPredefinedCursor(Cursor.SE_RESIZE_CURSOR));
+				else
+					w.setCursor(Cursor.getDefaultCursor());
 			}
 		}
 
@@ -241,7 +278,7 @@ class TcChatWindow extends JFrame
 				if (w != null && w.isShowing())
 				{
 					Rectangle rect = w.getBounds();
-					if (dragging)
+					if (dragging && (e.getModifiers() & InputEvent.CTRL_MASK) == InputEvent.CTRL_MASK)
 						w.setBounds(rect.x + (e.getXOnScreen() - prevX), rect.y + (e.getYOnScreen() - prevY), rect.width,
 								rect.height);
 					else
@@ -263,35 +300,62 @@ class TcChatWindow extends JFrame
 		}
 	}
 
+	private class TcKeyListener implements KeyListener
+	{
+
+		@Override
+		public void keyPressed(KeyEvent e)
+		{
+			if ((e.getModifiers() & InputEvent.CTRL_MASK) == InputEvent.CTRL_MASK
+					&& jScrollPane.getVerticalScrollBarPolicy() != JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED)
+			{
+				jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+				repaint();
+			}
+		}
+
+		@Override
+		public void keyReleased(KeyEvent e)
+		{
+			if ((e.getModifiers() & InputEvent.CTRL_MASK) != InputEvent.CTRL_MASK)
+			{
+				jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+				repaint();
+			}
+		}
+
+		@Override
+		public void keyTyped(KeyEvent e)
+		{
+		}
+
+	}
+
 	public void insertMessage(TcChatMessage msg)
 	{
 		messages.add(msg);
-		if (messages.size() > MAX_MESSAGE_COUNT)
+		if (messages.size() > max_msg_count)
 		{
-			messages.pollFirst();
+			TcChatMessage old = messages.pollFirst();
+			if (old != null)
+			{
+				HTMLDocument doc = (HTMLDocument) textPane.getDocument();
+				Element elem = doc.getElement(old.getId());
+				doc.removeElement(elem);
+			}
 		}
-		insertText(msg.toHtml());
-	}
 
-	public void removeFirstMessage()
-	{
-		HTMLDocument doc = (HTMLDocument) textPane.getDocument();
-		//Element elem = doc.getElement("1");
-		//doc.removeElement(elem);
-	}
-
-	public void insertText(String text)
-	{
 		HTMLDocument doc = (HTMLDocument) textPane.getDocument();
 		Element end = (doc).getElement("END_OF_MESSAGES");
+
 		try
 		{
-			kit.insertHTML(doc, end.getStartOffset(), text, 0, 0, null);
-			textPane.setCaretPosition(textPane.getDocument().getLength());
+			kit.insertHTML(doc, end.getStartOffset(), msg.toHtml(), 0, 0, null);
 		} catch (BadLocationException | IOException e)
 		{
 			e.printStackTrace();
 		}
+		textPane.setCaretPosition(textPane.getDocument().getLength());
 	}
 
 }
